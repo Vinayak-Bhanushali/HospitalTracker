@@ -1,9 +1,6 @@
 App = {
   web3Provider: null,
   contracts: {},
-  init: () => {
-    $.getJSON("./hospital.json", (data) => {});
-  },
 
   initWeb3: async () => {
     if (window.ethereum) {
@@ -29,21 +26,57 @@ App = {
     web3 = new Web3(App.web3Provider);
     return App.initContract();
   },
+
   initContract: () => {
     $.getJSON("BedTracker.json", (data) => {
       App.contracts.BedTracker = TruffleContract(data);
       App.contracts.BedTracker.setProvider(App.web3Provider);
-      return App.bindEvents();
+      return App.hospitalList()
     });
   },
-  bindEvents: () => {
-    $(document).on("click", ".btn-ether", App.Event);
+
+
+  hospitalList: () => {
+    $.getJSON('hospital.json', function (hospitalData) {
+      for (let i = 0; i < hospitalData.length; i++) {
+        var $tr = $('<tr>').append(
+          $('<th>').text(i),
+          $('<td>').text(hospitalData[i].name),
+          $('<td>').text(hospitalData[i].location),
+          $('<td>').attr("id", hospitalData[i].address).append(
+            $('<button>').text("Fetch").addClass("btn").addClass("btn-info").on("click", function e() {
+              App.fetchHospitalData(hospitalData[i].address, hospitalData[i].address);
+            })
+
+          )
+        ).appendTo('#hospitalTableBody');
+      }
+  });
+  
   },
-  Event: () => {},
+  fetchHospitalData:(id, address)=>{
+    var instance;
+    App.contracts.BedTracker.deployed().then((result)=>{
+      instance = result;
+      instance.balanceOf(address).then((currentBed)=>{
+        instance.getRecord({from:address}).then((usedBeds)=>{
+          currentBed = currentBed.toNumber()
+          usedBeds = usedBeds.toNumber()
+          const totalBeds = currentBed + usedBeds
+          const availableBeds = totalBeds - usedBeds;
+          $('#' + id).html("Total Beds: " + totalBeds + "\nUsed Beds: " + usedBeds + "\nAvailable Beds: " + availableBeds);
+        })
+
+      })
+    })
+    
+    
+  },
+
 };
 
 $(() => {
   $(window).on("load", () => {
-    App.init();
+    App.initWeb3();
   });
 });

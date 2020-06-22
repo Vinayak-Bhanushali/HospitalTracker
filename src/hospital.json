@@ -1,16 +1,16 @@
 [
   {
-    "address": "0xFA",
+    "address": "0x40517374976Cf01fbd1b97E9346bE717a1fe41FB",
     "name": "KEM Hospital",
     "location": "Kurla"
   },
   {
-    "address": "0xFB",
+    "address": "0x4BAF66C9A06d31A4EF6586DEB8b9A3A62f5E8Dfe",
     "name": "Rajawadi Hospital",
     "location": "Ghatkopar"
   },
   {
-    "address": "0xFC",
+    "address": "0xf14896737B8A22A7B96DD871a443711566920496",
     "name": "Kasturba Hospital",
     "location": "Vidyvihar"
    }
