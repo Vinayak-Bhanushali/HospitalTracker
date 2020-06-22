@@ -63,7 +63,7 @@ App = {
       return instance.balanceOf(address)
     }).then((currentB)=>{
         currentBed = currentB
-        return instance.getRecord({from:address})
+        return instance.getRecord(address)
     }).then((usedBeds)=>{
       currentBed = currentBed.toNumber()
       usedBeds = usedBeds.toNumber()

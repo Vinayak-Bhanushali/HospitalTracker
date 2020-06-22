@@ -22,7 +22,7 @@ contract BedTracker is ERC20 {
         _balances[msg.sender] += 1;
     }
 
-    function getRecord() public view returns(uint256){
-        return record[msg.sender];
+    function getRecord(address hospital) public view returns(uint256){
+        return record[hospital];
     }
 }
