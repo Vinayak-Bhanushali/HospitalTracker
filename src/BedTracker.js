@@ -52,28 +52,28 @@ App = {
         ).appendTo('#hospitalTableBody');
       }
   });
-  
   },
+
+
   fetchHospitalData:(id, address)=>{
     var instance;
+    var currentBed;
     App.contracts.BedTracker.deployed().then((result)=>{
       instance = result;
-      instance.balanceOf(address).then((currentBed)=>{
-        instance.getRecord({from:address}).then((usedBeds)=>{
-          currentBed = currentBed.toNumber()
-          usedBeds = usedBeds.toNumber()
-          const totalBeds = currentBed + usedBeds
-          const availableBeds = totalBeds - usedBeds;
-          $('#' + id).html("Total Beds: " + totalBeds + "\nUsed Beds: " + usedBeds + "\nAvailable Beds: " + availableBeds);
-        })
-
-      })
+      return instance.balanceOf(address)
+    }).then((currentB)=>{
+        currentBed = currentB
+        return instance.getRecord({from:address})
+    }).then((usedBeds)=>{
+      currentBed = currentBed.toNumber()
+      usedBeds = usedBeds.toNumber()
+      const totalBeds = currentBed + usedBeds
+      const availableBeds = totalBeds - usedBeds;
+      $('#' + id).html("Total Beds: " + totalBeds + "\nUsed Beds: " + usedBeds + "\nAvailable Beds: " + availableBeds);
     })
-    
-    
   },
-
 };
+
 
 $(() => {
   $(window).on("load", () => {
