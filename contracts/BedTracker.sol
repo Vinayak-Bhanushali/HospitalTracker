@@ -33,7 +33,7 @@ contract BedTracker is ERC20 {
         require(record[msg.sender] > 0, "All Beds are empty");
         record[msg.sender] -= 1;
         _balances[msg.sender] += 1;
-        for (uint i = 0; i < patientId[msg.sender].length - 1; i++) {
+        for (uint i = 0; i < patientId[msg.sender].length; i++) {
             if(patientId[msg.sender][i].id == num){
                 delete patientId[msg.sender][i];
                 for(uint256 j = i; j < patientId[msg.sender].length - 1; j++){
