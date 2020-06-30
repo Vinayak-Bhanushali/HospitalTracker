@@ -51,6 +51,7 @@ App = {
           )
         ).appendTo('#hospitalTableBody');
       }
+      $('#hospitalTable').DataTable();
   });
   },
 

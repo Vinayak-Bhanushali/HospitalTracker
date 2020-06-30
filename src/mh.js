@@ -3,7 +3,8 @@ App = {
     contracts: {},
     fetchLen: null,
     dateTimeFormat: new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric', minute: 'numeric', hour12: true }),
-  
+    currPage: 0,
+    entriesPerPage: 4,
     initWeb3: async () => {
       if (window.ethereum) {
         App.web3Provider = window.ethereum;
@@ -43,31 +44,27 @@ App = {
         //const data = '[{"id": "01", "time": "1592916472"},{"id": "02","time":"1592916479"},{"id": "03","time":"1592916485"},{"id": "04", "time":"1592916485"}]'
         acc = await web3.eth.getAccounts()
         instance = await App.contracts.BedTracker.deployed()
-        fetchLen = await instance.fetchLength({ from: acc[0] })
-        fetchLen = fetchLen.toNumber()
-        console.log(fetchLen)
+        App.fetchLen = await instance.fetchLength({ from: acc[0] })
+        App.fetchLen = App.fetchLen.toNumber()
+        //console.log(fetchLen)
         //hospitalData = jQuery.parseJSON(data)
+        App.buildPageCounter()
         App.buildTable()
       },
 
       buildTable:async()=> {
         let temp;
-        let hospitalData = [];
-        console.log(fetchLen)
         $('#hospitalTableBody').empty();
-        for (let i = 0; i < fetchLen; i++) {
+        let start = App.currPage*App.entriesPerPage;
+        for (let i = start; i < start+App.entriesPerPage; i++) {
           acc = await web3.eth.getAccounts()
           instance = await App.contracts.BedTracker.deployed()
           temp = await instance.getIdTimestamp(i, { from: acc[0] })
           temp[0] = temp[0].toNumber()
           temp[1] = temp[1].toNumber()
-          hospitalData.push(temp) 
-          console.log(hospitalData)
-          //console.log(hospitalData[].toNumber())
       
-      
-          const date = new Date(hospitalData[i][1] * 1000)
-          const id =hospitalData[i][0]
+          const date = new Date(temp[1] * 1000)
+          const id =temp[0]
           const [{ value: month }, , { value: day }, , { value: year }, , { value: hour }, , { value: minute }, , { value: dayPeriod }] = App.dateTimeFormat.formatToParts(date)
           var $tr = $('<tr>').append(
             $('<th>').text(id),
@@ -79,6 +76,7 @@ App = {
             )
           ).appendTo('#hospitalTableBody');
         }
+  
       },
 
       dischargePatient:async(id)=>{
@@ -88,8 +86,14 @@ App = {
                 instance = await App.contracts.BedTracker.deployed()
                 console.log(id)
                 await instance.discharge(id, { from: acc[0] })
-                //App.hospitalData.splice(i, 1);
+                //App.buildTable();
                 //fecthHospitalData();
+                if(Math.floor(App.fetchLen/App.entriesPerPage)==App.currPage && App.fetchLen%App.entriesPerPage==1){
+                  App.currPage -=1;
+                }
+                // if((App.currPage+1)*App.entriesPerPage!=App.fetchLen && App.fetchLen%App.entriesPerPage==1){
+                //   App.currPage -=1;
+                //   }
                 App.fecthHospitalData()
       },
   
@@ -102,12 +106,37 @@ App = {
         instance = await App.contracts.BedTracker.deployed()
         await instance.admit(id, { from: acc[0] })
       
-      
       //hospitalData.push({ "id": id,"time": Math.floor((new Date()).getTime() / 1000)});
       //buildTable();
+      // if(App.fetchLen%App.entriesPerPage == 0){
+        
+      //   App.buildPageCounter();
+      //   //return App.fecthHospitalData()
+      // }
       $('#addPatient').html('<button class="btn btn-outline-success my-2 my-sm-0" onclick="App.addPatient()">Admit</button>')
-      App.fecthHospitalData()
+      //return App.buildTable();
+      if((App.currPage+1)*App.entriesPerPage==App.fetchLen && App.fetchLen%App.entriesPerPage==0){
+        App.currPage +=1;
+        }
+      return App.fecthHospitalData()
           },
+
+      buildPageCounter: ()=>{
+        $("#pageCounter").empty();
+        for(let i=0; i<App.fetchLen; i+=App.entriesPerPage){
+          const val  = Math.floor(i/App.entriesPerPage);
+          $('<button type="button" class="btn btn-secondary">').text(val+1).on("click", ()=>{
+            App.nextPage(val);
+          }).appendTo("#pageCounter")
+        }
+      },
+
+      nextPage: (pageNo)=>{
+        App.currPage = pageNo;
+        App.buildTable();
+      },
+
+     
   
 
   };
