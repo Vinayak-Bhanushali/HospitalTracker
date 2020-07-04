@@ -7,31 +7,84 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
     integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <link rel="stylesheet" href="./css/commonstyle.css">
+  </link>
   <script src="./js/jquery.js"></script>
   <script src="./js/web3.min.js"></script>
   <script src="./js/truffle-contract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
-
+  <script src="./mh.js"></script>
   <title>Hospital Managment</title>
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">
-      <img src="/docs/4.5/assets/brand/bootstrap-solid.svg" width="30" height="30" class="d-inline-block align-top"
-        alt="" loading="lazy">
-      Hospital Managment
-    </a>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Hospital Name</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item px-2">
+          <img src="./assets/images/hospital-bed.svg" width="30" height="30" class="filter-blue" />
+          <p class="text-info d-inline" id="totalBeds">Total Beds: -</p>
+        </li>
+        <li class="nav-item px-2">
+          <img src="./assets/images/hospital-bed.svg" width="30" height="30" class="filter-green" />
+          <p class="text-success d-inline" id="availableBeds">Available Beds: -</p>
+        </li>
+        <li class="nav-item px-2">
+          <img src="./assets/images/hospital-bed.svg" width="30" height="30" class="filter-grey" />
+          <p class="text-secondary d-inline" id="usedBeds">Used Beds: -</p>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="search" id="patientID" placeholder="Patient ID" aria-label="Search">
+        <span id="searchPatient">
+          <button class="btn btn-primary my-2 mx-1 my-sm-0" type="button" onclick="App.showSearchModal()">Search</button>
+        </span>
+        <span id="addPatient">
+          <button class="btn btn-success my-2 mx-1 my-sm-0" type="button" onclick="App.addPatient()">Admit</button>
+        </span>
+      </form>
+    </div>
   </nav>
-  <nav class="navbar fixed-bottom navbar-light bg-light">
+  <!-- <nav class="navbar fixed-bottom navbar-light bg-light">
     <div class="form-inline ml-auto">
       <input class="form-control mr-sm-2" type="number" id="patientID" placeholder="Patient ID">
       <span id="addPatient">
         <button class="btn btn-outline-success my-2 my-sm-0" onclick="App.addPatient()">Admit</button>
       </span>
     </div>
-  </nav>
+  </nav> -->
+  <div class="modal fade" id="patientSearchModal" tabindex="-1" role="dialog" aria-labelledby="patientSearchModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="table-responsive-sm">
+            <table class="table table-hover" id="hospitalSearchTable">
+              <thead>
+                <tr>
+                  <th scope="col" style="width: 20%">Id</th>
+                  <th scope="col" style="width: 30%">Admit Time</th>
+                  <th scope="col" style="width: 50%">Action</th>
+                </tr>
+              </thead>
+              <tbody id="hospitalSearchTableBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="container">
     <div class="table-responsive-sm">
       <table class="table table-hover" id="hospitalTable">
@@ -48,7 +101,7 @@
       <div class="btn-group" role="group" id="pageCounter"></div>
     </div>
   </div>
-  <script src="./mh.js"></script>
+  
 </body>
 
 

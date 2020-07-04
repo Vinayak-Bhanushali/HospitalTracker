@@ -13,7 +13,7 @@ contract BedTracker is ERC20 {
     //mapping (address => uint256[]) timestamp;
 
     constructor() public ERC20("Beds", "BDS") {
-        _mint(msg.sender, 50);
+        _mint(msg.sender, 5000);
     }
 
     function admit(uint256 num) public {
@@ -47,12 +47,15 @@ contract BedTracker is ERC20 {
     function getRecord(address hospital) public view returns(uint256){
         return record[hospital];
     }
-/*
-    function setId(uint no) public {
-        patientId[msg.sender].push(no);
-        timestamp[msg.sender].push(block.timestamp);
+
+    function getById(uint256 num) public view returns(uint256) {
+        for (uint i = 0; i < patientId[msg.sender].length; i++) {
+            if(patientId[msg.sender][i].id == num){
+                return patientId[msg.sender][i].timestamp;
+            }
+        }
     }
-*/
+
     function getIdTimestamp(uint srNo) public view returns(uint,uint){
         return (patientId[msg.sender][srNo].id,patientId[msg.sender][srNo].timestamp);
     }

@@ -5,6 +5,9 @@ App = {
     dateTimeFormat: new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit', hour: 'numeric', minute: 'numeric', hour12: true }),
     currPage: 0,
     entriesPerPage: 4,
+    cb:null,
+    ub:null,
+    tb:null,
     initWeb3: async () => {
       if (window.ethereum) {
         App.web3Provider = window.ethereum;
@@ -21,11 +24,11 @@ App = {
       //  App.web3Provider = window.web3.currentProvider;
       //}
       // If no injected web3 instance is detected, fall back to Ganache
-      else {
-        App.web3Provider = new Web3.providers.HttpProvider(
-          "http://localhost:7545"
-        );
-      }
+      // else {
+      //   App.web3Provider = new Web3.providers.HttpProvider(
+      //     "http://localhost:7545"
+      //   );
+      // }
       web3 = new Web3(App.web3Provider);
       return App.initContract();
     },
@@ -50,13 +53,14 @@ App = {
         //hospitalData = jQuery.parseJSON(data)
         App.buildPageCounter()
         App.buildTable()
+        App.HospitalData()
       },
 
       buildTable:async()=> {
         let temp;
         $('#hospitalTableBody').empty();
         let start = App.currPage*App.entriesPerPage;
-        for (let i = start; i < start+App.entriesPerPage; i++) {
+        for (let i = start; (i < start+App.entriesPerPage && i< App.fetchLen); i++) {
           acc = await web3.eth.getAccounts()
           instance = await App.contracts.BedTracker.deployed()
           temp = await instance.getIdTimestamp(i, { from: acc[0] })
@@ -113,7 +117,7 @@ App = {
       //   App.buildPageCounter();
       //   //return App.fecthHospitalData()
       // }
-      $('#addPatient').html('<button class="btn btn-outline-success my-2 my-sm-0" onclick="App.addPatient()">Admit</button>')
+      $('#addPatient').html('<button class="btn btn-success my-2 my-sm-0" onclick="App.addPatient()">Admit</button>')
       //return App.buildTable();
       if((App.currPage+1)*App.entriesPerPage==App.fetchLen && App.fetchLen%App.entriesPerPage==0){
         App.currPage +=1;
@@ -135,6 +139,57 @@ App = {
         App.currPage = pageNo;
         App.buildTable();
       },
+
+      showSearchModal: async ()=>{
+        $('#searchPatient').html('<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>')
+          const id = $('#patientID').val();
+          $('#patientID').val('');
+          $('#hospitalSearchTableBody').empty();
+  
+        // fetch data of patient
+        acc = await web3.eth.getAccounts()
+        instance = await App.contracts.BedTracker.deployed()
+        //console.log(id)
+        timestamp = await instance.getById(id, { from: acc[0] })
+        timestamp = timestamp.toNumber()
+        // if data found
+        if (timestamp) {
+          const [{ value: month }, , { value: day }, , { value: year }, , { value: hour }, , { value: minute }, , { value: dayPeriod }] = App.dateTimeFormat.formatToParts(timestamp*1000)
+          var $tr = $('<tr>').append(
+              $('<th>').text(id),
+              $('<td>').html("<p>" + day + " " + month + ", " + year + " " + hour + ":" + minute + " " + dayPeriod + "<p>"),
+              $('<td>').attr("id", "discharge" + id).append(
+                $('<button>').text("Discharge").addClass("btn").addClass("btn-info").on("click",()=>{
+                  App.closeDischarge(id);
+                })
+              )
+            ).appendTo('#hospitalSearchTableBody');
+          $('#patientSearchModal').modal('show')
+        } else {
+          alert("No data found for Patient ID: "+id)
+        }
+        $('#searchPatient').html('<button class="btn btn-primary my-2 mx-1 my-sm-0" type="button" onclick="App.showSearchModal()">Search</button>')
+      },
+
+      HospitalData:async ()=>{
+        acc = await web3.eth.getAccounts()
+        var instance;
+        var currentBed;
+        instance = await App.contracts.BedTracker.deployed()
+        currentBed = await instance.balanceOf(acc[0])
+        usedBeds = await instance.getRecord(acc[0])
+        currentBed = currentBed.toNumber()
+        usedBeds = usedBeds.toNumber()
+        const totalBeds = currentBed + usedBeds
+        $('#totalBeds').text('Total Beds: '+totalBeds)
+        $('#availableBeds').text('Available Beds: '+currentBed)
+        $('#usedBeds').text('Used Beds: '+usedBeds)
+      },
+
+      closeDischarge:async (id)=>{
+        await App.dischargePatient(id)
+        $('#patientSearchModal').modal('hide')
+      }
 
      
   

@@ -3,6 +3,32 @@ App = {
   contracts: {},
 
   initWeb3: async () => {
+    // if (window.ethereum) {
+    //   handleEthereum();
+    // } else {
+    //   window.addEventListener('ethereum#initialized', handleEthereum, {
+    //     once: true,
+    //   });
+    
+    //   // If the event is not dispatched by the end of the timeout,
+    //   // the user probably doesn't have MetaMask installed.
+    //   setTimeout(handleEthereum, 3000); // 3 seconds
+    // }
+    
+    // function handleEthereum() {
+    //   const { ethereum } = window;
+    //   if (ethereum && ethereum.isMetaMask) {
+    //     App.web3Provider = ethereum;
+    //     console.log('Ethereum successfully detected!');
+    //     // Access the decentralized web!
+    //   } else {
+    //     console.log('Please install MetaMask!');
+    //   }
+    // }
+
+
+
+
     if (window.ethereum) {
       App.web3Provider = window.ethereum;
       try {
@@ -14,13 +40,15 @@ App = {
       }
     }
     // Legacy dapp browsers...
-    //else if (window.web3) {
-    //  App.web3Provider = window.web3.currentProvider;
-    //}
-    // If no injected web3 instance is detected, fall back to Ganache
+    else if (window.web3) {
+     App.web3Provider = window.web3.currentProvider;
+    }
+    //If no injected web3 instance is detected, fall back to Ganache
     else {
+      //App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545')
+      //App.web3Provider = new HDWalletProvider("run spell cluster agent capable divert document advance crowd cheap disease divorce", `https://ropsten.infura.io/v3/cadc6b0dc5c54720b973b3720eab5584`);
       App.web3Provider = new Web3.providers.HttpProvider(
-        "http://localhost:7545"
+        "https://ropsten.infura.io/v3/cadc6b0dc5c54720b973b3720eab5584"
       );
     }
     web3 = new Web3(App.web3Provider);
@@ -40,7 +68,6 @@ App = {
     $.getJSON('hospital.json', function (hospitalData) {
       for (let i = 0; i < hospitalData.length; i++) {
         var $tr = $('<tr>').append(
-          $('<th>').text(i),
           $('<td>').text(hospitalData[i].name),
           $('<td>').text(hospitalData[i].location),
           $('<td>').attr("id", hospitalData[i].address).append(
@@ -51,28 +78,35 @@ App = {
           )
         ).appendTo('#hospitalTableBody');
       }
-      $('#hospitalTable').DataTable();
+      $('#hospitalTable').DataTable({
+        "paging": false,
+        "info": false
+      });
   });
   },
 
 
-  fetchHospitalData:(id, address)=>{
+  fetchHospitalData:async(id, address)=>{
     var instance;
     var currentBed;
-    App.contracts.BedTracker.deployed().then((result)=>{
-      instance = result;
-      return instance.balanceOf(address)
-    }).then((currentB)=>{
-        currentBed = currentB
-        return instance.getRecord(address)
-    }).then((usedBeds)=>{
+      instance = await App.contracts.BedTracker.deployed()
+      currentBed = await instance.balanceOf(address)
+      usedBeds = await instance.getRecord(address)
       currentBed = currentBed.toNumber()
       usedBeds = usedBeds.toNumber()
       const totalBeds = currentBed + usedBeds
       const availableBeds = totalBeds - usedBeds;
-      $('#' + id).html("Total Beds: " + totalBeds + "\nUsed Beds: " + usedBeds + "\nAvailable Beds: " + availableBeds);
-    })
+      $('#' + id).html(App.generateDataHtml(totalBeds, usedBeds, availableBeds));
   },
+
+  generateDataHtml(totalBeds, usedBeds, availableBeds) {
+    return `<img src="./assets/images/hospital-bed.svg" width="30" height="30" class="filter-blue" />
+    <p class="text-info d-inline">Total Beds: `+ totalBeds + `</p> &nbsp;
+    <img src="./assets/images/hospital-bed.svg" width="30" height="30" class="filter-green" />
+    <p class="text-success d-inline">Available Beds: `+ usedBeds + `</p> &nbsp;
+    <img src="./assets/images/hospital-bed.svg" width="30" height="30" class="filter-grey" />
+    <p class="text-secondary d-inline">Used Beds: `+ availableBeds + `</p> &nbsp;`
+  }
 };
 
 

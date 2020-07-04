@@ -22,6 +22,7 @@
   "homepage": "https://github.com/Vinayak-Bhanushali/HospitalTracker#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^3.0.2",
+    "@truffle/hdwallet-provider": "^1.0.36",
     "lite-server": "^2.5.4"
   }
 }
