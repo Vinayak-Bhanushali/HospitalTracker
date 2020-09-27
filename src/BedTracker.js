@@ -48,7 +48,7 @@ App = {
       //App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545')
       //App.web3Provider = new HDWalletProvider("run spell cluster agent capable divert document advance crowd cheap disease divorce", `https://ropsten.infura.io/v3/cadc6b0dc5c54720b973b3720eab5584`);
       App.web3Provider = new Web3.providers.HttpProvider(
-        "https://ropsten.infura.io/v3/cadc6b0dc5c54720b973b3720eab5584"
+        "HTTP://127.0.0.1:7545"
       );
     }
     web3 = new Web3(App.web3Provider);
